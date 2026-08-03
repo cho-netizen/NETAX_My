@@ -3,1203 +3,280 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="robots" content="noindex, nofollow">
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231b2a41'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='34' font-weight='700' fill='%23c9a227' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E">
-<title>이음세무컨설팅 NETAX | 관리자 대시보드</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap" rel="stylesheet">
+<title>자료제출함 — my.netax.kr</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
 <style>
-  :root {
-    --navy: #0D1B3D;
-    --navy-deep: #081226;
-    --cream: #F8F6F0;
-    --gold: #C8A244;
-    --gold-light: #DCC17E;
-    --error: #B14545;
-    --ok: #5BA968;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  html, body { overflow-x: hidden; }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: var(--navy-deep);
-    min-height: 100vh;
-  }
-
-  #loginScreen {
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-  }
-
-  .card {
-    width: 100%;
-    max-width: 480px;
-    background: var(--navy);
-    border: 1px solid rgba(176,141,87,0.25);
-    border-radius: 4px;
-    padding: 40px 32px;
-    position: relative;
-  }
-
-  .card::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, var(--gold-light), var(--gold), var(--gold-light));
-    border-radius: 4px 4px 0 0;
-  }
-
-  h1 {
-    font-family: 'Nanum Myeongjo', serif;
-    font-size: 22px;
-    font-weight: 800;
-    color: var(--cream);
-    text-align: center;
-    margin-bottom: 24px;
-  }
-
-  @media (max-width: 480px) {
-    #loginScreen { padding: 0; align-items: stretch; }
-    .card {
-      max-width: 100%;
-      min-height: 100dvh;
-      border-radius: 0;
-      display: flex;
-      flex-direction: column;
-      padding: 36px 20px 20px;
-    }
-    .card::before { border-radius: 0; }
-    h1 { font-size: 19px; }
-  }
-
-  .field-row { display: flex; gap: 8px; margin-bottom: 8px; }
-
-  input[type="password"],
-  input[type="text"] {
-    flex: 1;
-    min-width: 0;
-    width: 100%;
-    padding: 13px 14px;
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.28);
-    border-radius: 3px;
-    color: var(--cream);
-    font-size: 15px;
-    font-family: 'Noto Sans KR', sans-serif;
-    text-align: center;
-  }
-  input::placeholder { color: rgba(246,243,236,0.55); font-size: 12px; }
-  input:focus { outline: none; border-color: var(--gold); background: rgba(255,255,255,0.06); }
-
-  button {
-    background: var(--gold);
-    color: var(--navy-deep);
-    border: none;
-    border-radius: 3px;
-    font-size: 15px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  button:hover { background: var(--gold-light); }
-  button:disabled { opacity: 0.5; cursor: default; }
-
-  #loginScreen button[type="submit"] { padding: 0 22px; white-space: nowrap; }
-
-  .message { margin-top: 8px; font-size: 13px; text-align: center; line-height: 1.6; }
-  .message.error { color: var(--error); }
-
-  #dashboard { display: none; }
-
+  :root { --header-color: #3D5378; --gold: #C9A24B; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Malgun Gothic", sans-serif; background: #F5F6F8; }
   .topbar {
-    background: var(--navy);
-    border-bottom: 1px solid rgba(176,141,87,0.25);
-    padding: 16px 0;
-    position: sticky; top: 0; z-index: 50;
+    background: linear-gradient(135deg, var(--header-color), #2c3e5c);
+    border-bottom: 4px solid var(--gold);
+    color: #fff; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;
   }
-  .topbar .wrap { display: flex; align-items: center; justify-content: space-between; }
-  .topbar h1 { margin: 0; text-align: left; font-size: 19px; white-space: nowrap; }
-  .logout-btn { background: transparent; border: 1px solid rgba(246,243,236,0.3); color: rgba(246,243,236,0.75); padding: 8px 16px; font-size: 13px; font-weight: 600; border-radius: 3px; white-space: nowrap; }
-  .logout-btn:hover { background: rgba(255,255,255,0.06); color: var(--cream); }
-
-  @media (max-width: 480px) {
-    .topbar { padding: 12px 0; }
-    .topbar h1 { font-size: 15px; }
-    .logout-btn { font-size: 11px; padding: 6px 10px; }
-    .main-menu button { padding: 12px 8px; font-size: 13.5px; }
-    .menu-content { padding: 16px; }
-    .tabs { gap: 4px; }
-    .tabs button { padding: 10px 12px; font-size: 12.5px; }
+  .topbar h1 { font-size: 16px; margin: 0; }
+  .topbar a { color: #fff; text-decoration: none; font-size: 13px; opacity: 0.85; }
+  .container { max-width: 640px; margin: 20px auto; padding: 0 16px 60px; }
+  .item-card {
+    background: #fff; border-radius: 10px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); overflow: hidden;
   }
-
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
-
-  .main-menu { display: flex; gap: 8px; margin: 28px 0 0; }
-  .main-menu button {
-    flex: 1; background: rgba(255,255,255,0.04); border: 1px solid rgba(176,141,87,0.2); border-bottom: none;
-    border-radius: 4px 4px 0 0; padding: 16px; font-size: 15px; font-weight: 700;
-    color: rgba(246,243,236,0.5); cursor: pointer; transition: .2s;
+  .item-head {
+    padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer;
   }
-  .main-menu button.active { color: var(--cream); background: var(--navy); border-bottom: 3px solid var(--gold); }
-
-  .menu-content {
-    display: none; background: var(--navy); border: 1px solid rgba(176,141,87,0.2); border-top: none;
-    padding: 28px; border-radius: 0 0 4px 4px; margin-bottom: 48px;
+  .item-title { font-weight: 600; font-size: 14.5px; }
+  .badge { font-size: 11.5px; padding: 3px 9px; border-radius: 20px; font-weight: 600; }
+  .badge.done { background: #e7f6ec; color: #1a7d3a; }
+  .badge.pending { background: #fdeceb; color: #c0392b; }
+  .item-body { padding: 0 16px 16px; display: none; border-top: 1px solid #f0f0f0; }
+  .item-body.open { display: block; }
+  .file-row {
+    display: flex; align-items: center; gap: 8px; padding: 8px 0; border-bottom: 1px dashed #eee; font-size: 13px;
   }
-  .menu-content.active { display: block; }
-
-  .tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(255,255,255,0.12); margin-bottom: 24px; }
-  .tabs button { background: none; border: none; border-radius: 0; padding: 12px 20px; font-size: 14px; font-weight: 600; color: rgba(246,243,236,0.5); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
-  .tabs button.active { color: var(--gold-light); border-bottom-color: var(--gold); background: none; }
-
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
-
-  h3 { font-family: 'Nanum Myeongjo', serif; color: var(--cream); font-size: 16px; font-weight: 700; text-align: left; margin: 0 0 4px; }
-
-  .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 16px 0 32px; border-radius: 4px; }
-  .table-scroll table { margin: 0; }
-
-  table { width: 100%; min-width: 620px; border-collapse: collapse; }
-  table th { background: rgba(255,255,255,0.06); color: var(--gold-light); padding: 12px; text-align: left; font-weight: 600; font-size: 13px; border-bottom: 1px solid rgba(255,255,255,0.15); white-space: nowrap; }
-  table td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 14px; color: var(--cream); white-space: nowrap; }
-  table tr:hover td { background: rgba(255,255,255,0.03); }
-
-  @media (max-width: 480px) {
-    table { min-width: 560px; }
-    table th, table td { padding: 10px; font-size: 13px; }
+  .file-row .fname { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .file-row button {
+    background: #f0f0f0; border: none; border-radius: 6px; padding: 5px 8px; font-size: 12px; cursor: pointer;
   }
-
-  button.approve { background: var(--ok); color: #06210c; padding: 6px 12px; font-size: 12px; margin-right: 4px; }
-  button.approve:hover { background: #6fc57e; }
-  button.reject { background: var(--error); color: #fff; padding: 6px 12px; font-size: 12px; }
-  button.reject:hover { background: #c95c5c; }
-
-  .loading, .empty-row { text-align: center; padding: 32px; color: rgba(246,243,236,0.45); }
-
-  .stats-box { margin: 16px 0; padding: 8px 20px; background: rgba(255,255,255,0.05); border-radius: 4px; color: var(--cream); font-size: 14px; }
-  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-  .stat-row:last-child { border-bottom: none; }
-  .stat-label { color: rgba(246,243,236,0.6); }
-  .stat-value { color: var(--gold-light); font-weight: 700; font-size: 16px; }
-
-  .toast { position: fixed; bottom: 20px; right: 20px; background: var(--navy); border: 1px solid var(--gold); color: var(--cream); padding: 16px 24px; border-radius: 4px; z-index: 1000; }
-
-  .search-box { margin-bottom: 16px; display: flex; gap: 8px; align-items: stretch; }
-  .search-box input[type="text"] { flex: 1; }
-
-  .refresh-btn {
-    flex: 0 0 auto; display: flex; align-items: center; justify-content: center;
-    width: 44px; background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.28);
-    border-radius: 3px; color: var(--gold-light); cursor: pointer; font-size: 17px; transition: .15s;
+  .add-btn, .submit-btn {
+    width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 8px; cursor: pointer; font-size: 13.5px; font-weight: 600;
   }
-  .refresh-btn:hover:not(:disabled) { background: rgba(200,162,68,0.18); border-color: rgba(200,162,68,0.5); }
-  .refresh-btn:disabled { opacity: 0.6; cursor: default; }
-  .refresh-btn.spinning svg { animation: rb-spin 0.7s linear infinite; }
-  @keyframes rb-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-  .new-report-toggle {
-    background: transparent; border: 1px solid rgba(200,162,68,0.5); color: var(--gold-light);
-    padding: 10px 16px; font-size: 13px; font-weight: 700; border-radius: 4px; margin-bottom: 16px; cursor: pointer;
-  }
-  .new-report-toggle:hover { background: rgba(200,162,68,0.12); }
-  .new-report-form {
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(176,141,87,0.25); border-radius: 6px;
-    padding: 20px; margin-bottom: 20px;
-  }
-  .new-report-form label { display: block; font-size: 12.5px; font-weight: 700; color: var(--cream); margin-bottom: 6px; }
-  .new-report-form input[type="text"], .new-report-form select {
-    background: rgba(255,255,255,0.09); border: 1px solid rgba(255,255,255,0.28); border-radius: 3px;
-    color: var(--cream); font-size: 14px; font-family: 'Noto Sans KR', sans-serif; text-align: left;
-    padding: 10px 12px; width: 100%; margin-bottom: 14px;
-  }
-  .new-report-form select { cursor: pointer; }
-  .new-report-form select option { background: var(--navy); color: var(--cream); }
-  .new-report-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
-  .new-report-msg { font-size: 13px; color: #FFE5B4; margin-bottom: 12px; min-height: 18px; }
-  .new-report-submit {
-    background: var(--gold); color: var(--navy-deep); border: none; padding: 11px 20px;
-    font-size: 14px; font-weight: 700; border-radius: 3px; cursor: pointer;
-  }
-  .new-report-submit:hover:not(:disabled) { background: var(--gold-light); }
-  .new-report-submit:disabled { opacity: 0.5; cursor: not-allowed; }
-
-  @media (max-width: 480px) {
-    .new-report-grid { grid-template-columns: 1fr; }
-  }
-  .customer-list { max-height: none; }
-
-  .customer-item {
-    display: block;
-    padding: 14px 16px;
-    margin-bottom: 8px;
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 4px;
-    text-decoration: none;
-    transition: background 0.15s ease, border-color 0.15s ease;
-  }
-  .customer-item:hover { background: rgba(255,255,255,0.11); border-color: var(--gold); }
-
-  .customer-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .customer-name { color: var(--cream); font-size: 16px; font-weight: 600; }
-  .customer-title { color: rgba(246,243,236,0.6); font-size: 13px; }
-  .customer-issued { color: rgba(246,243,236,0.45); font-size: 12px; }
-
-  .badge { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
-  .badge-expired { background: rgba(177,69,69,0.25); color: #E68A8A; }
-
-  .report-id-chip {
-    font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; letter-spacing: 0.5px;
-    color: var(--gold-light); background: rgba(200,162,68,0.12); border: 1px solid rgba(200,162,68,0.4);
-    padding: 3px 10px; border-radius: 10px; cursor: pointer; white-space: nowrap; transition: .15s;
-  }
-  .report-id-chip:hover { background: rgba(200,162,68,0.22); }
-  .report-id-chip.copied { background: var(--ok); border-color: var(--ok); color: #06210c; }
-
-  .pw-reset-chip {
-    font-size: 11px; font-weight: 600; color: #E68A8A; background: rgba(177,69,69,0.12);
-    border: 1px solid rgba(177,69,69,0.4); padding: 3px 10px; border-radius: 10px; cursor: pointer;
-    white-space: nowrap; transition: .15s;
-  }
-  .pw-reset-chip:hover:not(:disabled) { background: rgba(177,69,69,0.25); }
-  .pw-reset-chip:disabled { opacity: 0.5; cursor: default; }
-  .pw-reset-chip.done { background: var(--ok); border-color: var(--ok); color: #06210c; }
-
-  .delete-chip {
-    font-size: 11px; font-weight: 700; color: #F6F3EC; background: rgba(177,69,69,0.55);
-    border: 1px solid rgba(177,69,69,0.8); padding: 3px 10px; border-radius: 10px; cursor: pointer;
-    white-space: nowrap; transition: .15s;
-  }
-  .delete-chip:hover:not(:disabled) { background: rgba(177,69,69,0.8); }
-  .delete-chip:disabled { opacity: 0.5; cursor: default; }
-
-  .customer-meta { color: rgba(246,243,236,0.55); font-size: 12.5px; margin-top: 4px; }
-
-  .empty-state { text-align: center; color: rgba(246,243,236,0.55); font-size: 14px; padding: 24px 0; }
-
-  .report-modal { display: none; position: fixed; inset: 0; z-index: 200; background: var(--navy-deep); flex-direction: column; }
-  .report-modal.active { display: flex; }
-  .report-modal-bar {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    padding: 10px 16px; background: var(--navy); border-bottom: 1px solid rgba(176,141,87,0.25);
-  }
-  .modal-back-btn {
-    background: transparent; border: 1px solid rgba(246,243,236,0.3); color: var(--cream);
-    padding: 8px 14px; font-size: 13px; font-weight: 700; border-radius: 3px; white-space: nowrap;
-  }
-  .modal-back-btn:hover { background: rgba(255,255,255,0.08); }
-  .report-modal-title { color: var(--cream); font-size: 14px; font-weight: 600; flex: 1; text-align: center; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .modal-newtab-btn {
-    color: var(--gold-light); font-size: 12.5px; text-decoration: none;
-    border: 1px solid rgba(176,141,87,0.3); padding: 8px 12px; border-radius: 3px; white-space: nowrap;
-  }
-  .modal-newtab-btn:hover { background: rgba(255,255,255,0.06); }
-  .modal-refresh-btn {
-    background: transparent; border: 1px solid rgba(176,141,87,0.3); color: var(--gold-light);
-    padding: 8px 10px; font-size: 13px; border-radius: 3px; display: flex; align-items: center; cursor: pointer;
-  }
-  .modal-refresh-btn:hover:not(:disabled) { background: rgba(255,255,255,0.06); }
-  .modal-refresh-btn:disabled { opacity: 0.5; cursor: default; }
-  .modal-refresh-btn.spinning svg { animation: rb-spin 0.7s linear infinite; }
-  .report-modal-frame { flex: 1; width: 100%; border: none; background: #fff; }
+  .add-btn { background: #eef1f5; color: var(--header-color); }
+  .submit-btn { background: var(--header-color); color: #fff; }
+  .submit-btn:disabled { opacity: 0.5; }
+  .status-line { font-size: 12px; color: #888; margin-top: 8px; text-align: center; min-height: 16px; }
+  input[type=file] { display: none; }
 </style>
 </head>
 <body>
-
-<div id="loginScreen">
-  <div class="card">
-    <h1>관리자 대시보드</h1>
-
-    <form id="adminForm">
-      <div class="field-row">
-        <input type="password" id="adminCode" placeholder="관리자 비밀번호" aria-label="관리자 비밀번호" autocomplete="off" required>
-        <button type="submit" id="submitBtn">확인</button>
-      </div>
-    </form>
-
-    <div id="message" class="message"></div>
-  </div>
-</div>
-
-<div id="dashboard">
-
   <div class="topbar">
-    <div class="wrap">
-      <h1>NETAX Admin</h1>
-      <button class="logout-btn" onclick="logout()">로그아웃</button>
-    </div>
+    <h1 id="topTitle">자료제출함</h1>
+    <a href="/">메인으로</a>
+  </div>
+  <div class="container" id="container">
+    <div style="text-align:center;color:#999;padding:40px 0;">불러오는 중입니다...</div>
   </div>
 
-  <div class="wrap">
-    <div class="main-menu">
-      <button class="menu-btn active" onclick="switchMenu(0)">예약관리</button>
-      <button class="menu-btn" onclick="switchMenu(1)">보고관리</button>
-      <button class="menu-btn" onclick="switchMenu(2)">케이스관리</button>
-    </div>
+  <script src="/config.js"></script>
+  <script>
+    const session = requireSessionOrRedirect();
+    // 항목별 큐: { itemName: [ {name, kind:'image'|'pdf', arrayBuffer, rotation} ] }
+    const queues = {};
 
-    <!-- ===================== 메뉴 0: 예약관리 ===================== -->
-    <div id="menu0" class="menu-content active">
-      <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab(0)">상담신청 관리</button>
-        <button class="tab-btn" onclick="switchTab(1)">통계</button>
-      </div>
-
-      <div id="tab0" class="tab-content active">
-        <h3>상담신청 대기</h3>
-        <div class="table-scroll">
-          <table id="pending-table">
-            <thead>
-              <tr>
-                <th>신청자</th>
-                <th>전화</th>
-                <th>유형</th>
-                <th>신청일</th>
-                <th>상황</th>
-                <th>액션</th>
-              </tr>
-            </thead>
-            <tbody id="pending-tbody">
-              <tr><td colspan="6" class="loading">로딩 중...</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>상담신청 완료</h3>
-        <div class="table-scroll">
-          <table id="approved-table">
-            <thead>
-              <tr>
-                <th>신청자</th>
-                <th>전화</th>
-                <th>신청일</th>
-                <th>확정일</th>
-                <th>예약일</th>
-              </tr>
-            </thead>
-            <tbody id="approved-tbody">
-              <tr><td colspan="5" class="loading">로딩 중...</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <div id="tab1" class="tab-content">
-        <h3>상담신청 통계</h3>
-        <div id="stats-info" class="stats-box"></div>
-      </div>
-    </div>
-
-    <!-- ===================== 메뉴 1: 보고서관리 ===================== -->
-    <div id="menu1" class="menu-content">
-      <button type="button" class="new-report-toggle" id="newReportToggle" onclick="toggleNewReportForm()">+ 신규 보고서 등록</button>
-
-      <div class="new-report-form" id="newReportForm" style="display:none;">
-        <div class="new-report-grid">
-          <div>
-            <label for="nr-name">고객명 *</label>
-            <input type="text" id="nr-name" placeholder="홍길동">
-          </div>
-          <div>
-            <label for="nr-title">명칭</label>
-            <input type="text" id="nr-title" placeholder="예: 양도소득세 검토보고서">
-          </div>
-          <div>
-            <label for="nr-type">유형</label>
-            <input type="text" id="nr-type" placeholder="예: 세무자문">
-          </div>
-          <div>
-            <label for="nr-permission">권한</label>
-            <select id="nr-permission">
-              <option value="허용">허용 (다운로드 가능)</option>
-              <option value="차단">차단 (다운로드 불가)</option>
-            </select>
-          </div>
-        </div>
-        <label for="nr-link">자료링크 (Google Drive 공유 링크) *</label>
-        <input type="text" id="nr-link" placeholder="https://drive.google.com/file/d/...">
-        <div class="new-report-msg" id="nrMsg"></div>
-        <button type="button" class="new-report-submit" id="nrSubmit" onclick="submitNewReport()">등록</button>
-      </div>
-
-      <div class="search-box">
-        <input type="text" id="searchInput" placeholder="고객명 검색">
-        <button type="button" class="refresh-btn" id="refreshListBtn" title="목록 새로고침" onclick="manualRefreshList()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
-        </button>
-      </div>
-      <div class="customer-list" id="customerList"></div>
-    </div>
-
-    <!-- ===================== 메뉴 2: 케이스관리(my.netax.kr) ===================== -->
-    <div id="menu2" class="menu-content">
-      <button type="button" class="new-report-toggle" id="newCaseToggle" onclick="toggleNewCaseForm()">+ 신규 케이스 등록</button>
-
-      <div class="new-report-form" id="newCaseForm" style="display:none;">
-        <div class="new-report-grid">
-          <div>
-            <label for="nc-name">고객명 *</label>
-            <input type="text" id="nc-name" placeholder="홍길동">
-          </div>
-          <div>
-            <label for="nc-case">사건명 *</label>
-            <input type="text" id="nc-case" placeholder="예: 양도소득세, 증여, 상속">
-          </div>
-        </div>
-        <label for="nc-checklist">필요서류 체크리스트 (한 줄에 하나씩)</label>
-        <textarea id="nc-checklist" rows="4" placeholder="등기부등본&#10;매매계약서&#10;가족관계증명서"
-          style="width:100%;background:rgba(255,255,255,0.09);border:1px solid rgba(255,255,255,0.28);border-radius:3px;color:var(--cream);font-size:14px;font-family:'Noto Sans KR',sans-serif;padding:10px 12px;margin-bottom:14px;resize:vertical;"></textarea>
-        <label for="nc-permission">보고서 다운로드 권한</label>
-        <select id="nc-permission">
-          <option value="허용">허용 (다운로드 가능)</option>
-          <option value="차단">차단 (다운로드 불가)</option>
-        </select>
-        <div class="new-report-msg" id="ncMsg"></div>
-        <button type="button" class="new-report-submit" id="ncSubmit" onclick="submitNewCase()">등록</button>
-      </div>
-
-      <div class="search-box">
-        <input type="text" id="caseSearchInput" placeholder="고객명 검색">
-        <button type="button" class="refresh-btn" id="refreshCaseListBtn" title="목록 새로고침" onclick="manualRefreshCaseList()">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
-        </button>
-      </div>
-      <div class="customer-list" id="caseList"></div>
-    </div>
-  </div>
-
-</div>
-
-<!-- ===================== 보고서 열람 모달 ===================== -->
-<div id="reportModal" class="report-modal">
-  <div class="report-modal-bar">
-    <button class="modal-back-btn" onclick="closeReportModal()">← 목록으로</button>
-    <span id="reportModalTitle" class="report-modal-title"></span>
-    <button type="button" class="modal-refresh-btn" id="reportRefreshBtn" title="보고서 새로고침" onclick="refreshReportModal()">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 4v5h-5"/></svg>
-    </button>
-    <a id="reportModalNewTab" class="modal-newtab-btn" href="#" target="_blank" rel="noopener">새 탭에서 열기 ↗</a>
-  </div>
-  <iframe id="reportModalFrame" class="report-modal-frame" src="about:blank" title="보고서 열람"></iframe>
-</div>
-
-<div id="toast-msg" class="toast" style="display: none;"></div>
-
-<script>
-const REPORT_API_URL = 'https://script.google.com/macros/s/AKfycbyg0gDbzPPkpZs2Gnsuw7Qh_qszYy1_8f2Q-SN7Ffreoc3GfHzIZ7B5UXNidT5ale_b/exec';
-const BOOKING_API_URL = 'https://script.google.com/macros/s/AKfycbxJNuDRHaElDL5lVcUFzd5fxAagH4Ql7Jtpcnhhc3_tvh8qfOD3LLcI660DkFIbrwoW4A/exec';
-const MY_API_URL = 'https://script.google.com/macros/s/AKfycbzpyTO4wLZNJhpoiV0Ke3u1KsRW_4x6LppvPWE9hyZbE9UrZzDzQ2gOLndzmeKeHwBLsw/exec';
-
-const adminForm = document.getElementById('adminForm');
-const submitBtn = document.getElementById('submitBtn');
-const messageEl = document.getElementById('message');
-
-let allCustomers = [];
-let allBookingData = [];
-let allCases = [];
-let currentAdminCode = '';
-
-adminForm.addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const password = document.getElementById('adminCode').value;
-  submitBtn.disabled = true;
-  messageEl.textContent = '';
-  messageEl.className = 'message';
-
-  try {
-    const res = await fetch(REPORT_API_URL, {
-      method: 'POST',
-      body: JSON.stringify({ action: 'admin_list', admin_code: password })
-    });
-    const data = await res.json();
-
-    if (!data.success) {
-      messageEl.textContent = data.message || '비밀번호가 틀렸습니다.';
-      messageEl.className = 'message error';
-      submitBtn.disabled = false;
-      return;
+    if (session) {
+      document.getElementById('topTitle').textContent = (session.case_name || '자료제출함');
+      init();
     }
 
-    currentAdminCode = password;
-    allCustomers = data.customers || [];
-
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('dashboard').style.display = 'block';
-
-    renderCustomers(allCustomers);
-    loadConsultingData();
-
-  } catch (err) {
-    console.error(err);
-    messageEl.textContent = '서버 연결에 실패했습니다.';
-    messageEl.className = 'message error';
-    submitBtn.disabled = false;
-  }
-});
-
-function logout() {
-  currentAdminCode = '';
-  allCustomers = [];
-  allBookingData = [];
-  allCases = [];
-  document.getElementById('dashboard').style.display = 'none';
-  document.getElementById('loginScreen').style.display = 'flex';
-  document.getElementById('adminCode').value = '';
-  submitBtn.disabled = false;
-}
-
-function switchMenu(index) {
-  document.querySelectorAll('.menu-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.menu-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`menu${index}`).classList.add('active');
-  document.querySelectorAll('.menu-btn')[index].classList.add('active');
-
-  if (index === 2 && allCases.length === 0) reloadCaseList();
-}
-
-function switchTab(index) {
-  document.querySelectorAll('#menu0 .tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('#menu0 .tab-btn').forEach(el => el.classList.remove('active'));
-  document.getElementById(`tab${index}`).classList.add('active');
-  document.querySelectorAll('#menu0 .tab-btn')[index].classList.add('active');
-
-  if (index === 1) updateStats();
-}
-
-function loadConsultingData() {
-  fetch(BOOKING_API_URL + '?action=getBookings')
-    .then(response => response.json())
-    .then(data => {
-      allBookingData = data.bookings || [];
-      renderTables();
-    })
-    .catch(error => {
-      console.error('로딩 오류:', error);
-      showToast('예약 데이터 로드 실패');
-    });
-}
-
-function renderTables() {
-  const pending = allBookingData
-    .map((b, idx) => ({ ...b, originalIndex: idx }))
-    .filter(b => !b.status || b.status === '신청');
-  const approved = allBookingData
-    .map((b, idx) => ({ ...b, originalIndex: idx }))
-    .filter(b => b.status === '확정');
-
-  const pendingHtml = pending.length > 0
-    ? pending.map((b) => `
-      <tr>
-        <td>${b.name || '-'}</td>
-        <td>${b.phone || '-'}</td>
-        <td>${b.type || '-'}</td>
-        <td>${formatDate(b.date)}</td>
-        <td>${(b.situation || '').substring(0, 20)}...</td>
-        <td>
-          <button class="approve" onclick="approveBooking(${b.originalIndex})">✓승인</button>
-          <button class="reject" onclick="rejectBooking(${b.originalIndex})">✕거절</button>
-        </td>
-      </tr>
-    `).join('')
-    : '<tr><td colspan="6" class="empty-row">신청 대기 항목이 없습니다.</td></tr>';
-
-  document.getElementById('pending-tbody').innerHTML = pendingHtml;
-
-  const approvedHtml = approved.length > 0
-    ? approved.map(b => `
-      <tr>
-        <td>${b.name || '-'}</td>
-        <td>${b.phone || '-'}</td>
-        <td>${formatDate(b.date)}</td>
-        <td>${b.approvedDate || '-'}</td>
-        <td>${b.reservedDate || '예약 대기'}</td>
-      </tr>
-    `).join('')
-    : '<tr><td colspan="5" class="empty-row">완료된 항목이 없습니다.</td></tr>';
-
-  document.getElementById('approved-tbody').innerHTML = approvedHtml;
-}
-
-function approveBooking(index) {
-  if (!confirm('승인하시겠습니까?')) return;
-
-  const booking = allBookingData[index];
-  const sheetRow = index + 2;
-
-  fetch(BOOKING_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'approve',
-      rowIndex: sheetRow,
-      eventId: booking.eventId || '',
-      phone: booking.phone,
-      reservedDate: booking.reservedDate,
-      reservedTime: booking.reservedTime
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showToast('승인되었습니다.');
-      loadConsultingData();
-    } else {
-      showToast('승인 실패: ' + (data.error || ''));
+    async function init() {
+      const result = await callGas({
+        action: 'get_checklist_status',
+        report_id: session.report_id,
+        password_hash: session.password_hash
+      });
+      const container = document.getElementById('container');
+      if (!result.success) {
+        container.innerHTML = `<div style="text-align:center;color:#c0392b;padding:40px 0;">${result.message || '불러오기 실패'}</div>`;
+        return;
+      }
+      if (!result.checklist.length) {
+        container.innerHTML = renderVoluntarySection((result.submission_status._extra) || []);
+        return;
+      }
+      container.innerHTML = result.checklist.map((item, idx) => renderItemCard(item, idx, result.submission_status[item])).join('')
+        + renderVoluntarySection((result.submission_status._extra) || []);
     }
-  })
-  .catch(error => {
-    console.error('오류:', error);
-    showToast('승인 중 오류 발생');
-  });
-}
 
-function rejectBooking(index) {
-  if (!confirm('거절하시겠습니까?')) return;
-
-  const sheetRow = index + 2;
-  const booking = allBookingData[index];
-
-  fetch(BOOKING_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'reject',
-      rowIndex: sheetRow,
-      phone: booking.phone
-    })
-  })
-  .then(response => response.json())
-  .then(data => {
-    if (data.success) {
-      showToast('거절되었습니다.');
-      loadConsultingData();
-    } else {
-      showToast('거절 실패: ' + (data.error || ''));
+    function renderVoluntarySection(extraList) {
+      const historyHtml = extraList.length
+        ? extraList.map(f => `<div class="file-row" style="border-bottom:1px dashed #eee;"><div class="fname">✔ ${escapeHtml(f.fileName)}</div></div>`).join('')
+        : '';
+      return `
+        <div class="item-card" id="card-voluntary">
+          <div class="item-head" onclick="toggleCard('voluntary')">
+            <div class="item-title">기타 제출 (체크리스트에 없는 자료)</div>
+            <div class="badge pending">추가제출</div>
+          </div>
+          <div class="item-body" id="body-voluntary">
+            <div style="font-size:12.5px;color:#888;margin-bottom:10px;">요청받지 않았지만 함께 내고 싶은 자료가 있으면 여기서 올려주세요.</div>
+            <div id="voluntary-history">${historyHtml}</div>
+            <input id="voluntary-label" placeholder="자료명을 적어주세요 (예: 위임장)"
+              style="width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;font-size:13.5px;margin-top:10px;">
+            <div id="filelist-voluntary"></div>
+            <button class="add-btn" onclick="document.getElementById('fileinput-voluntary').click()">＋ 파일 추가(사진/PDF)</button>
+            <input type="file" id="fileinput-voluntary" accept="image/*,application/pdf" multiple
+                   onchange="handleFiles('voluntary', '__voluntary__', this.files)">
+            <button class="submit-btn" id="submitbtn-voluntary" onclick="submitItem('voluntary', '__voluntary__')" disabled>병합 후 제출</button>
+            <div class="status-line" id="statusline-voluntary"></div>
+          </div>
+        </div>
+      `;
     }
-  })
-  .catch(error => {
-    console.error('오류:', error);
-    showToast('거절 중 오류 발생');
-  });
-}
 
-function updateStats() {
-  const total = allBookingData.length;
-  const pending = allBookingData.filter(b => !b.status || b.status === '신청').length;
-  const approved = allBookingData.filter(b => b.status === '확정').length;
+    function renderItemCard(item, idx, status) {
+      const done = status && status.submitted;
+      return `
+        <div class="item-card" id="card-${idx}">
+          <div class="item-head" onclick="toggleCard(${idx})">
+            <div class="item-title">${escapeHtml(item)}</div>
+            <div class="badge ${done ? 'done' : 'pending'}">${done ? '제출완료' : '미제출'}</div>
+          </div>
+          <div class="item-body" id="body-${idx}">
+            ${done ? `<div style="font-size:12.5px;color:#888;margin-bottom:8px;">이전 제출: ${escapeHtml(status.fileName || '')}</div>` : ''}
+            <div id="filelist-${idx}"></div>
+            <button class="add-btn" onclick="document.getElementById('fileinput-${idx}').click()">＋ 파일 추가(사진/PDF)</button>
+            <input type="file" id="fileinput-${idx}" accept="image/*,application/pdf" multiple
+                   onchange="handleFiles(${idx}, '${escapeAttr(item)}', this.files)">
+            <button class="submit-btn" id="submitbtn-${idx}" onclick="submitItem(${idx}, '${escapeAttr(item)}')" disabled>병합 후 제출</button>
+            <div class="status-line" id="statusline-${idx}"></div>
+          </div>
+        </div>
+      `;
+    }
 
-  document.getElementById('stats-info').innerHTML = `
-    <div class="stat-row"><span class="stat-label">전체 신청</span><span class="stat-value">${total}건</span></div>
-    <div class="stat-row"><span class="stat-label">대기 중</span><span class="stat-value">${pending}건</span></div>
-    <div class="stat-row"><span class="stat-label">확정 완료</span><span class="stat-value">${approved}건</span></div>
-  `;
-}
+    function toggleCard(idx) {
+      document.getElementById('body-' + idx).classList.toggle('open');
+    }
 
-function formatDate(dateStr) {
-  if (!dateStr) return '-';
-  if (typeof dateStr === 'number') {
-    return new Date(dateStr).toLocaleDateString('ko-KR');
-  }
-  return dateStr;
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast-msg');
-  toast.textContent = msg;
-  toast.style.display = 'block';
-  setTimeout(() => { toast.style.display = 'none'; }, 3000);
-}
-
-function renderCustomers(list) {
-  const customerListEl = document.getElementById('customerList');
-  if (list.length === 0) {
-    customerListEl.innerHTML = '<div class="empty-state">검색 결과가 없습니다.</div>';
-    return;
-  }
-  customerListEl.innerHTML = list.map(c => {
-    const url = `https://rpt.netax.kr/?report_id=${encodeURIComponent(c.report_id)}&admin=${encodeURIComponent(currentAdminCode)}`;
-    const badge = c.is_expired ? '<span class="badge badge-expired">기간만료</span>' : '';
-
-    const topParts = [`<span class="customer-name">${escapeHtml(c.name)}</span>`];
-    if (c.title) topParts.push(`<span class="customer-title">${escapeHtml(c.title)}</span>`);
-    if (c.issued) topParts.push(`<span class="customer-issued">${formatReportDate(c.issued)}</span>`);
-
-    const metaParts = [];
-    if (c.first_access) metaParts.push('최초 ' + formatReportDate(c.first_access));
-    if (c.access_count > 0) metaParts.push(c.access_count + '회');
-    if (c.last_access) metaParts.push('최종 ' + formatReportDate(c.last_access));
-
-    const pwResetBtn = c.has_accessed
-      ? `<button type="button" class="pw-reset-chip" title="비밀번호 초기화" onclick="event.stopPropagation(); event.preventDefault(); clearPassword('${escapeHtml(c.report_id)}', '${escapeHtml(c.name)}', this)">🔓 비번초기화</button>`
-      : '';
-
-    const deleteBtn = `<button type="button" class="delete-chip" title="보고서 삭제" onclick="event.stopPropagation(); event.preventDefault(); deleteReport('${escapeHtml(c.report_id)}', '${escapeHtml(c.name)}', this)">🗑️ 삭제</button>`;
-
-    return `<a class="customer-item" href="${url}" onclick="return openReportModal(event, '${url}', '${escapeHtml(c.name)} 보고서')">
-      <div class="customer-name-row">
-        ${topParts.join('')}
-        ${badge}
-        <button type="button" class="report-id-chip" title="열람번호 복사" onclick="event.stopPropagation(); event.preventDefault(); copyReportId('${escapeHtml(c.report_id)}', this)">${escapeHtml(c.report_id)} 복사</button>
-        ${pwResetBtn}
-        ${deleteBtn}
-      </div>
-      <div class="customer-meta">${escapeHtml(metaParts.join(' · '))}</div>
-    </a>`;
-  }).join('');
-}
-
-function copyReportId(reportId, btn) {
-  const original = btn.textContent;
-  const done = () => {
-    btn.textContent = '복사됨!';
-    btn.classList.add('copied');
-    setTimeout(() => {
-      btn.textContent = original;
-      btn.classList.remove('copied');
-    }, 1500);
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(reportId).then(done).catch(() => {
-      alert('복사에 실패했습니다. 열람번호: ' + reportId);
-    });
-  } else {
-    alert('열람번호: ' + reportId);
-  }
-}
-
-function toggleNewReportForm() {
-  const form = document.getElementById('newReportForm');
-  const hidden = form.style.display === 'none' || !form.style.display;
-  form.style.display = hidden ? 'block' : 'none';
-}
-
-function submitNewReport() {
-  const name = document.getElementById('nr-name').value.trim();
-  const title = document.getElementById('nr-title').value.trim();
-  const type = document.getElementById('nr-type').value.trim();
-  const link = document.getElementById('nr-link').value.trim();
-  const permission = document.getElementById('nr-permission').value;
-  const msgEl = document.getElementById('nrMsg');
-  const submitBtn = document.getElementById('nrSubmit');
-
-  if (!name) {
-    msgEl.style.color = '#FFE5B4';
-    msgEl.textContent = '고객명을 입력해 주세요.';
-    return;
-  }
-  if (!link) {
-    msgEl.style.color = '#FFE5B4';
-    msgEl.textContent = '자료링크를 입력해 주세요.';
-    return;
-  }
-
-  submitBtn.disabled = true;
-  msgEl.style.color = '#FFE5B4';
-  msgEl.textContent = '등록하는 중...';
-
-  fetch(REPORT_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'create_report',
-      admin_code: currentAdminCode,
-      name, title, type, link, permission
-    })
-  })
-    .then(res => res.json())
-    .then(data => {
-      submitBtn.disabled = false;
-      if (data.success) {
-        msgEl.style.color = '#7FFF7F';
-        msgEl.textContent = `등록 완료! 열람번호: ${data.report_id} (${data.name})`;
-        document.getElementById('nr-name').value = '';
-        document.getElementById('nr-title').value = '';
-        document.getElementById('nr-type').value = '';
-        document.getElementById('nr-link').value = '';
-        document.getElementById('nr-permission').value = '허용';
-        reloadCustomerList();
-      } else {
-        msgEl.style.color = '#FFB4B4';
-        msgEl.textContent = data.message || '등록에 실패했습니다.';
+    async function handleFiles(idx, item, fileList) {
+      if (!queues[item]) queues[item] = [];
+      for (const f of fileList) {
+        const buf = await f.arrayBuffer();
+        const kind = f.type === 'application/pdf' ? 'pdf' : 'image';
+        queues[item].push({ name: f.name, kind, mimeType: f.type, arrayBuffer: buf, rotation: 0 });
       }
-    })
-    .catch(() => {
-      submitBtn.disabled = false;
-      msgEl.style.color = '#FFB4B4';
-      msgEl.textContent = '네트워크 오류가 발생했습니다.';
-    });
-}
+      renderQueue(idx, item);
+    }
 
-function reloadCustomerList() {
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 12000);
+    function renderQueue(idx, item) {
+      const list = queues[item] || [];
+      const el = document.getElementById('filelist-' + idx);
+      el.innerHTML = list.map((f, i) => `
+        <div class="file-row">
+          <div class="fname">${escapeHtml(f.name)}${f.rotation ? ' (' + f.rotation + '°)' : ''}</div>
+          <button onclick="moveFile('${escapeAttr(item)}', ${idx}, ${i}, -1)">↑</button>
+          <button onclick="moveFile('${escapeAttr(item)}', ${idx}, ${i}, 1)">↓</button>
+          <button onclick="rotateFile('${escapeAttr(item)}', ${idx}, ${i})">⟳ 회전</button>
+          <button onclick="removeFile('${escapeAttr(item)}', ${idx}, ${i})">삭제</button>
+        </div>
+      `).join('');
+      document.getElementById('submitbtn-' + idx).disabled = list.length === 0;
+    }
 
-  return fetch(REPORT_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'admin_list', admin_code: currentAdminCode }),
-    signal: controller.signal
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        allCustomers = data.customers || [];
-        const keyword = (document.getElementById('searchInput').value || '').trim().toLowerCase();
-        const filtered = keyword
-          ? allCustomers.filter(c => (c.name || '').toLowerCase().includes(keyword))
-          : allCustomers;
-        renderCustomers(filtered);
-      }
-      return data;
-    })
-    .catch(err => ({ success: false, timedOut: err && err.name === 'AbortError' }))
-    .finally(() => clearTimeout(timeoutId));
-}
+    function moveFile(item, idx, i, dir) {
+      const list = queues[item];
+      const j = i + dir;
+      if (j < 0 || j >= list.length) return;
+      [list[i], list[j]] = [list[j], list[i]];
+      renderQueue(idx, item);
+    }
+    function rotateFile(item, idx, i) {
+      queues[item][i].rotation = (queues[item][i].rotation + 90) % 360;
+      renderQueue(idx, item);
+    }
+    function removeFile(item, idx, i) {
+      queues[item].splice(i, 1);
+      renderQueue(idx, item);
+    }
 
-function manualRefreshList() {
-  const btn = document.getElementById('refreshListBtn');
-  if (btn.disabled) return;
-  btn.disabled = true;
-  btn.classList.add('spinning');
-  reloadCustomerList()
-    .then(data => {
-      if (!data || !data.success) {
-        showToast(data && data.timedOut ? '응답이 없습니다. 잠시 후 다시 시도해주세요.' : '새로고침에 실패했습니다.');
-      }
-    })
-    .finally(() => {
-      btn.disabled = false;
-      btn.classList.remove('spinning');
-    });
-}
+    // 큐에 쌓인 이미지/PDF들을 하나의 PDF로 병합(회전 반영) 후 업로드
+    async function submitItem(idx, item) {
+      const list = queues[item] || [];
+      if (!list.length) return;
+      const statusLine = document.getElementById('statusline-' + idx);
+      const btn = document.getElementById('submitbtn-' + idx);
+      btn.disabled = true;
+      statusLine.textContent = '병합하는 중입니다...';
 
-function clearPassword(reportId, name, btn) {
-  if (!confirm(`${name}님의 비밀번호를 초기화할까요?\n다음 접속 시 새 비밀번호를 설정하게 됩니다.`)) return;
+      try {
+        const { PDFDocument, degrees } = PDFLib;
+        const mergedPdf = await PDFDocument.create();
 
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '처리중...';
+        for (const f of list) {
+          if (f.kind === 'pdf') {
+            const src = await PDFDocument.load(f.arrayBuffer);
+            const pageIndices = src.getPageIndices();
+            const copied = await mergedPdf.copyPages(src, pageIndices);
+            copied.forEach(p => {
+              if (f.rotation) p.setRotation(degrees(p.getRotation().angle + f.rotation));
+              mergedPdf.addPage(p);
+            });
+          } else {
+            let img;
+            if (f.mimeType.includes('png')) {
+              img = await mergedPdf.embedPng(f.arrayBuffer);
+            } else {
+              img = await mergedPdf.embedJpg(f.arrayBuffer);
+            }
+            const page = mergedPdf.addPage([img.width, img.height]);
+            page.drawImage(img, { x: 0, y: 0, width: img.width, height: img.height });
+            if (f.rotation) page.setRotation(degrees(f.rotation));
+          }
+        }
 
-  fetch(REPORT_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'clear_password', admin_code: currentAdminCode, report_id: reportId })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        btn.textContent = '초기화됨!';
-        btn.classList.add('done');
-        setTimeout(() => reloadCustomerList(), 1200);
-      } else {
+        const mergedBytes = await mergedPdf.save();
+        const base64 = arrayBufferToBase64(mergedBytes);
+
+        statusLine.textContent = '업로드하는 중입니다...';
+
+        const isVoluntary = (item === '__voluntary__');
+        let fileName, checklistItemToSend;
+        if (isVoluntary) {
+          const labelEl = document.getElementById('voluntary-label');
+          const label = (labelEl.value || '').trim() || ('기타제출_' + Date.now());
+          fileName = label + '.pdf';
+          checklistItemToSend = '';
+        } else {
+          fileName = item + '.pdf';
+          checklistItemToSend = item;
+        }
+
+        const result = await callGas({
+          action: 'upload_file',
+          report_id: session.report_id,
+          password_hash: session.password_hash,
+          filename: fileName,
+          mime_type: 'application/pdf',
+          base64_data: base64,
+          checklist_item: checklistItemToSend
+        });
+
+        if (result.success) {
+          statusLine.textContent = '제출이 완료되었습니다.';
+          if (isVoluntary) {
+            const historyEl = document.getElementById('voluntary-history');
+            historyEl.innerHTML += `<div class="file-row" style="border-bottom:1px dashed #eee;"><div class="fname">✔ ${escapeHtml(fileName)}</div></div>`;
+            document.getElementById('voluntary-label').value = '';
+          } else {
+            document.querySelector(`#card-${idx} .badge`).textContent = '제출완료';
+            document.querySelector(`#card-${idx} .badge`).className = 'badge done';
+          }
+          queues[item] = [];
+          renderQueue(idx, item);
+        } else {
+          statusLine.textContent = result.message || '제출 중 오류가 발생했습니다.';
+          btn.disabled = false;
+        }
+      } catch (err) {
+        statusLine.textContent = '오류: ' + err.message;
         btn.disabled = false;
-        btn.textContent = original;
-        alert(data.message || '초기화에 실패했습니다.');
       }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.textContent = original;
-      alert('네트워크 오류가 발생했습니다.');
-    });
-}
+    }
 
-function deleteReport(reportId, name, btn) {
-  if (!confirm(`${name}님의 보고서(${reportId})를 삭제할까요?\n이 작업은 되돌릴 수 없습니다.`)) return;
-
-  const typed = prompt(`정말 삭제하시려면 고객명을 정확히 입력해주세요.\n(고객명: ${name})`);
-  if (typed === null) return;
-  if (typed.trim() !== name.trim()) {
-    alert('입력하신 이름이 일치하지 않아 삭제가 취소되었습니다.');
-    return;
-  }
-
-  const original = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = '삭제중...';
-
-  fetch(REPORT_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'delete_report', admin_code: currentAdminCode, report_id: reportId })
-  })
-    .then(res => res.json())
-    .then(data => {
-      if (data.success) {
-        reloadCustomerList();
-      } else {
-        btn.disabled = false;
-        btn.textContent = original;
-        alert(data.message || '삭제에 실패했습니다.');
+    function arrayBufferToBase64(buffer) {
+      let binary = '';
+      const bytes = new Uint8Array(buffer);
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
       }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.textContent = original;
-      alert('네트워크 오류가 발생했습니다.');
-    });
-}
-
-function formatReportDate(value) {
-  try {
-    const d = new Date(value);
-    if (isNaN(d.getTime())) return String(value);
-    const yy = String(d.getFullYear()).slice(-2);
-    const mm = String(d.getMonth() + 1).padStart(2, '0');
-    const dd = String(d.getDate()).padStart(2, '0');
-    return `${yy}-${mm}-${dd}`;
-  } catch (e) {
-    return String(value);
-  }
-}
-
-function escapeHtml(str) {
-  return String(str || '').replace(/[&<>"']/g, m => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[m]));
-}
-
-document.getElementById('searchInput').addEventListener('input', (e) => {
-  const keyword = e.target.value.trim().toLowerCase();
-  const filtered = allCustomers.filter(c => (c.name || '').toLowerCase().includes(keyword));
-  renderCustomers(filtered);
-});
-
-function toggleNewCaseForm() {
-  const form = document.getElementById('newCaseForm');
-  const hidden = form.style.display === 'none' || !form.style.display;
-  form.style.display = hidden ? 'block' : 'none';
-}
-
-function submitNewCase() {
-  const name = document.getElementById('nc-name').value.trim();
-  const caseName = document.getElementById('nc-case').value.trim();
-  const checklistRaw = document.getElementById('nc-checklist').value;
-  const permission = document.getElementById('nc-permission').value;
-  const msgEl = document.getElementById('ncMsg');
-  const submitBtn = document.getElementById('ncSubmit');
-
-  if (!name || !caseName) {
-    msgEl.style.color = '#FFE5B4';
-    msgEl.textContent = '고객명과 사건명을 입력해 주세요.';
-    return;
-  }
-
-  const checklist = checklistRaw.split('\n').map(s => s.trim()).filter(Boolean);
-
-  submitBtn.disabled = true;
-  msgEl.style.color = '#FFE5B4';
-  msgEl.textContent = '등록하는 중...';
-
-  fetch(MY_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({
-      action: 'admin_create_case',
-      admin_code: currentAdminCode,
-      name, case_name: caseName, checklist, permission
-    })
-  })
-  .then(res => res.json())
-  .then(data => {
-    submitBtn.disabled = false;
-    if (data.success) {
-      msgEl.style.color = '#7FFF7F';
-      msgEl.textContent = `등록 완료! 열람번호: ${data.report_id}`;
-      document.getElementById('nc-name').value = '';
-      document.getElementById('nc-case').value = '';
-      document.getElementById('nc-checklist').value = '';
-      document.getElementById('nc-permission').value = '허용';
-      reloadCaseList();
-    } else {
-      msgEl.style.color = '#FFB4B4';
-      msgEl.textContent = data.message || '등록에 실패했습니다.';
+      return btoa(binary);
     }
-  })
-  .catch(() => {
-    submitBtn.disabled = false;
-    msgEl.style.color = '#FFB4B4';
-    msgEl.textContent = '네트워크 오류가 발생했습니다.';
-  });
-}
 
-function renderCases(list) {
-  const el = document.getElementById('caseList');
-  if (!list.length) {
-    el.innerHTML = '<div class="empty-state">등록된 케이스가 없습니다.</div>';
-    return;
-  }
-  el.innerHTML = list.map((c, idx) => {
-    const checklist = c.checklist || [];
-    const status = c.submission_status || {};
-    const extra = status._extra || [];
-
-    const checklistRows = checklist.length
-      ? checklist.map(item => {
-          const done = status[item] && status[item].submitted;
-          return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,0.08);font-size:13px;">
-            <span style="color:rgba(246,243,236,0.85);">${escapeHtml(item)}</span>
-            <span style="font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;${done ? 'background:rgba(91,169,104,0.2);color:var(--ok);' : 'background:rgba(177,69,69,0.15);color:#E68A8A;'}">${done ? '제출완료' : '미제출'}</span>
-          </div>`;
-        }).join('')
-      : '<div style="font-size:13px;color:rgba(246,243,236,0.4);padding:6px 0;">등록된 필요서류가 없습니다.</div>';
-
-    const extraRows = extra.length
-      ? `<div style="margin-top:8px;font-size:12px;color:rgba(246,243,236,0.5);">기타 제출 ${extra.length}건: ${extra.map(f => escapeHtml(f.fileName)).join(', ')}</div>`
-      : '';
-
-    return `
-    <div class="customer-item" style="cursor:default;">
-      <div class="customer-name-row">
-        <span class="customer-name">${escapeHtml(c.name)}</span>
-        <span class="customer-title">${escapeHtml(c.case_name)}</span>
-        <button type="button" class="report-id-chip" title="열람번호 복사" onclick="copyCaseReportId('${escapeHtml(c.report_id)}', this)">${escapeHtml(c.report_id)} 복사</button>
-        <button type="button" class="pw-reset-chip" style="color:var(--gold-light);background:rgba(200,162,68,0.12);border-color:rgba(200,162,68,0.4);" title="필요서류 항목 추가" onclick="addChecklistItem('${escapeHtml(c.report_id)}', '${escapeHtml(c.name)}')">＋ 항목 추가</button>
-        <button type="button" class="pw-reset-chip" style="color:rgba(246,243,236,0.7);background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.2);" onclick="toggleCaseDetail(${idx})">서류 현황 ▾</button>
-        ${c.has_password ? '' : '<span class="badge" style="background:rgba(200,162,68,0.2);color:var(--gold-light);">비밀번호 미설정</span>'}
-      </div>
-      <div class="customer-meta">${escapeHtml(String(c.issued || '').slice(0,10))} 발급</div>
-      <div id="case-detail-${idx}" style="display:none;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.1);">
-        ${checklistRows}
-        ${extraRows}
-      </div>
-    </div>
-  `;
-  }).join('');
-}
-
-function toggleCaseDetail(idx) {
-  const el = document.getElementById('case-detail-' + idx);
-  el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
-}
-
-function addChecklistItem(reportId, name) {
-  const item = prompt(`${name}님에게 추가로 요청할 서류명을 입력해주세요.\n(예: 가족관계증명서)`);
-  if (item === null) return;
-  const trimmed = item.trim();
-  if (!trimmed) return;
-
-  fetch(MY_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'admin_add_checklist_item', admin_code: currentAdminCode, report_id: reportId, item: trimmed })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      showToast(`"${trimmed}" 항목이 추가되었습니다.`);
-      reloadCaseList();
-    } else {
-      alert(data.message || '추가에 실패했습니다.');
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
-  })
-  .catch(() => alert('네트워크 오류가 발생했습니다.'));
-}
-
-function copyCaseReportId(reportId, btn) {
-  const original = btn.textContent;
-  const done = () => {
-    btn.textContent = '복사됨!';
-    btn.classList.add('copied');
-    setTimeout(() => { btn.textContent = original; btn.classList.remove('copied'); }, 1500);
-  };
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(reportId).then(done).catch(() => alert('열람번호: ' + reportId));
-  } else {
-    alert('열람번호: ' + reportId);
-  }
-}
-
-function reloadCaseList() {
-  return fetch(MY_API_URL, {
-    method: 'POST',
-    body: JSON.stringify({ action: 'admin_list', admin_code: currentAdminCode })
-  })
-  .then(res => res.json())
-  .then(data => {
-    if (data.success) {
-      allCases = data.cases || [];
-      const keyword = (document.getElementById('caseSearchInput').value || '').trim().toLowerCase();
-      const filtered = keyword ? allCases.filter(c => (c.name || '').toLowerCase().includes(keyword)) : allCases;
-      renderCases(filtered);
+    function escapeAttr(s) {
+      return String(s).replace(/'/g, "\\'");
     }
-    return data;
-  })
-  .catch(err => ({ success: false }));
-}
-
-function manualRefreshCaseList() {
-  const btn = document.getElementById('refreshCaseListBtn');
-  if (btn.disabled) return;
-  btn.disabled = true;
-  btn.classList.add('spinning');
-  reloadCaseList().finally(() => {
-    btn.disabled = false;
-    btn.classList.remove('spinning');
-  });
-}
-
-document.getElementById('caseSearchInput').addEventListener('input', (e) => {
-  const keyword = e.target.value.trim().toLowerCase();
-  renderCases(allCases.filter(c => (c.name || '').toLowerCase().includes(keyword)));
-});
-
-let reportModalOpen = false;
-let currentReportUrl = '';
-
-function openReportModal(e, url, title) {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return true;
-  e.preventDefault();
-
-  currentReportUrl = url;
-  document.getElementById('reportModalTitle').textContent = title;
-  document.getElementById('reportModalNewTab').href = url;
-  document.getElementById('reportModalFrame').src = url;
-  document.getElementById('reportModal').classList.add('active');
-
-  if (!reportModalOpen) {
-    history.pushState({ reportModal: true }, '');
-    reportModalOpen = true;
-  }
-  return false;
-}
-
-function refreshReportModal() {
-  if (!currentReportUrl) return;
-  const btn = document.getElementById('reportRefreshBtn');
-  btn.disabled = true;
-  btn.classList.add('spinning');
-
-  const frame = document.getElementById('reportModalFrame');
-  const sep = currentReportUrl.includes('?') ? '&' : '?';
-  frame.src = currentReportUrl + sep + '_r=' + Date.now();
-
-  const stopSpin = () => {
-    btn.disabled = false;
-    btn.classList.remove('spinning');
-    frame.removeEventListener('load', stopSpin);
-  };
-  frame.addEventListener('load', stopSpin);
-  setTimeout(stopSpin, 6000);
-}
-
-function closeReportModal() {
-  if (reportModalOpen) {
-    history.back();
-  } else {
-    closeReportModalInternal();
-  }
-}
-
-function closeReportModalInternal() {
-  document.getElementById('reportModal').classList.remove('active');
-  document.getElementById('reportModalFrame').src = 'about:blank';
-}
-
-window.addEventListener('popstate', () => {
-  if (reportModalOpen) {
-    reportModalOpen = false;
-    closeReportModalInternal();
-  }
-});
-</script>
-
+  </script>
 </body>
 </html>
